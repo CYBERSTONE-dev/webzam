@@ -1,0 +1,93 @@
+{
+  "entities": {
+    "Product": {
+      "title": "Product",
+      "description": "A product available for purchase",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "image": { "type": "string" },
+        "basePrice": { "type": "number" },
+        "margin": { "type": "number" },
+        "sellingPrice": { "type": "number" },
+        "discountPrice": { "type": "number" },
+        "category": { "type": "string" },
+        "stock": { "type": "integer" },
+        "sku": { "type": "string" },
+        "soldCount": { "type": "integer" },
+        "viewCount": { "type": "integer" },
+        "trending": { "type": "boolean" },
+        "featured": { "type": "boolean" },
+        "createdAt": { "type": "integer" }
+      },
+      "required": ["title", "sellingPrice", "image", "sku"]
+    },
+    "Order": {
+      "title": "Order",
+      "description": "A customer order",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "totalAmount": { "type": "number" },
+        "status": { "type": "string", "enum": ["pending", "processing", "shipped", "delivered", "cancelled"] },
+        "paymentStatus": { "type": "string", "enum": ["pending", "paid", "failed"] },
+        "paymentMethod": { "type": "string", "enum": ["cod", "upi", "razorpay"] },
+        "createdAt": { "type": "integer" }
+      },
+      "required": ["userId", "totalAmount", "status"]
+    },
+    "User": {
+      "title": "User Profile",
+      "description": "User account information",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "email": { "type": "string" },
+        "displayName": { "type": "string" },
+        "role": { "type": "string", "enum": ["admin", "user"] },
+        "totalSpent": { "type": "number" },
+        "orderCount": { "type": "integer" },
+        "createdAt": { "type": "integer" }
+      },
+      "required": ["uid", "email", "role"]
+    },
+    "Coupon": {
+      "title": "Coupon",
+      "description": "Discount coupon",
+      "type": "object",
+      "properties": {
+        "code": { "type": "string" },
+        "discountType": { "type": "string", "enum": ["percentage", "fixed"] },
+        "discountValue": { "type": "number" },
+        "minOrderAmount": { "type": "number" },
+        "expiryDate": { "type": "integer" },
+        "usageLimit": { "type": "integer" },
+        "usageCount": { "type": "integer" },
+        "active": { "type": "boolean" }
+      },
+      "required": ["code", "discountType", "discountValue"]
+    },
+    "Category": {
+      "title": "Category",
+      "description": "Product category",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "slug": { "type": "string" },
+        "description": { "type": "string" },
+        "productCount": { "type": "integer" },
+        "image": { "type": "string" },
+        "createdAt": { "type": "integer" }
+      },
+      "required": ["name", "slug"]
+    }
+  },
+  "firestore": {
+    "products": { "schema": "Product", "description": "Store products" },
+    "orders": { "schema": "Order", "description": "Store customer orders" },
+    "users": { "schema": "User", "description": "Store user profiles" },
+    "categories": { "schema": "Category", "description": "Product categories" },
+    "coupons": { "schema": "Coupon", "description": "Discount coupons" }
+  }
+}
