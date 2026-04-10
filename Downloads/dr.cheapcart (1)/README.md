@@ -72,7 +72,7 @@ src/
 ## Security
 
 - Firestore security rules protect data
-- Admin access restricted to `wealthwizard1k@gmail.com`
+- Admin access restricted to `wealthwizard1k@gmail.com`, `abdulhadimonu@gmail.com`
 - Authentication required for checkout
 - HTTPS enforced
 

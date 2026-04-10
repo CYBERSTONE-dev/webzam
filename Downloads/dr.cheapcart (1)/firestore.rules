@@ -4,53 +4,33 @@ service cloud.firestore {
     function isAuthenticated() {
       return request.auth != null;
     }
-    function isOwner(userId) {
-      return isAuthenticated() && request.auth.uid == userId;
-    }
     function isAdmin() {
-      return isAuthenticated() && 
-        (request.auth.token.email == "wealthwizard1k@gmail.com" ||
-         (exists(/databases/$(database)/documents/users/$(request.auth.uid)) && 
-          get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin'));
-    }
-    function isValidUser(data) {
-      return data.keys().hasAll(['uid', 'email', 'role']) &&
-             data.uid is string &&
-             data.email is string &&
-             data.role in ['admin', 'user'];
-    }
-    function isValidProduct(data) {
-      return data.keys().hasAll(['title', 'price', 'image']) &&
-             data.title is string && data.title.size() > 0 &&
-             data.price is number && data.price >= 0 &&
-             data.image is string;
-    }
-    function isValidOrder(data) {
-      return data.keys().hasAll(['userId', 'totalAmount', 'status', 'shippingAddress']) &&
-             data.userId is string &&
-             data.totalAmount is number &&
-             data.status in ['pending', 'processing', 'shipped', 'delivered', 'cancelled'] &&
-             data.shippingAddress is map;
+      return isAuthenticated() && (
+        request.auth.token.email == "wealthwizard1k@gmail.com" ||
+        request.auth.token.email == "abdulhadimonu@gmail.com"
+      );
     }
 
     match /users/{userId} {
-      allow read: if isOwner(userId) || isAdmin();
-      allow create: if isAuthenticated() && request.auth.uid == userId && isValidUser(request.resource.data);
-      allow update: if isAdmin() || (isOwner(userId) && isValidUser(request.resource.data) && request.resource.data.role == resource.data.role);
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated();
     }
 
     match /products/{productId} {
       allow read: if true;
-      allow create: if isAdmin() && isValidProduct(request.resource.data);
-      allow update: if isAdmin();
-      allow delete: if isAdmin();
+      allow write: if isAuthenticated();
     }
 
     match /orders/{orderId} {
-      allow read: if isAuthenticated() && (resource.data.userId == request.auth.uid || isAdmin());
-      allow create: if isAuthenticated() && isValidOrder(request.resource.data) && request.resource.data.userId == request.auth.uid;
-      allow update: if isAdmin() && isValidOrder(request.resource.data);
-      allow delete: if false;
+      // Allow anyone to create orders (guest checkout)
+      allow create: if true;
+      // Allow read: owner OR admin
+      allow read: if isAuthenticated() && 
+        (request.auth.uid == resource.data.userId || isAdmin());
+      // Only admin can update orders (status changes)
+      allow update: if isAdmin();
+      // Only admin can delete orders
+      allow delete: if isAdmin();
     }
 
     match /categories/{catId} {
@@ -66,6 +46,39 @@ service cloud.firestore {
     match /settings/{settingId} {
       allow read: if true;
       allow write: if isAdmin();
+    }
+
+    match /reviews/{reviewId} {
+      allow read: if true;
+      allow create: if isAuthenticated();
+      allow update, delete: if isAdmin();
+    }
+
+    match /returnRequests/{returnId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated();
+      allow update: if isAdmin();
+      allow delete: if false;
+    }
+
+    match /notifications/{notifId} {
+      // Allow read: owner of notification OR admin
+      allow read: if isAuthenticated() && 
+        (request.auth.uid == resource.data.userId || isAdmin());
+      // Only admin can create notifications (automated system)
+      allow create: if isAdmin();
+      // Only admin can update/delete notifications
+      allow update, delete: if isAdmin();
+    }
+
+    match /visitors/{visitorId} {
+      allow read: if isAdmin();
+      allow write: if true;
+    }
+
+    match /visitorLogs/{logId} {
+      allow read: if isAdmin();
+      allow create: if true;
     }
   }
 }
